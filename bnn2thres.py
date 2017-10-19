@@ -68,7 +68,7 @@ def writeNetwork(filename, threslogics, input_shape, output_shape):
 
 
 def main():
-    bnn_params = np.load('binarilized_mnist.npz')
+    bnn_params = np.load('binarized_mnist.npz')
     input_shape  = 28 * 28 #len(bnn_params['arr_0'])
     output_shape = 10 * 1  #len(bnn_params['arr_{}'].format(len(bnn_params) - 1))
     n_hiddens    = 3       #len(bnn_params) / 6 - 1
