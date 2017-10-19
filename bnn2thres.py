@@ -1,0 +1,123 @@
+#!/usr/bin/python3
+
+import sys
+import time
+import numpy as np
+
+class ThresGate():
+    def __init__(self, Id, weights, thres_val, fanins, fanouts):
+        self.Id = Id
+        self.weights = weights
+        self.thres_val = thres_val
+        self.fanins = fanins
+        self.fanouts = fanouts
+
+    def getOutput(self, inputs):
+        assert len(inputs) == len(weights)
+        val = 0
+        for i in range(len(inputs)):
+            val += inputs[i] * weights[i]
+        if val >= self.thres_val:
+            return 1
+        return -1
+
+def sign(x):
+    if x >= 0:
+        return 1
+    return -1
+
+def writeNetwork(filename, threslogics, input_shape, output_shape):
+    with open(filename, 'w') as f:
+        f.write('##################################################\n')
+        f.write('# Benchmark generate from BNN mnist params       #\n')
+        f.write('# Author: Hao Chen ({})    #\n'.format(time.ctime()))
+        f.write('##################################################\n\n')
+
+        f.write('.model {}\n\n'.format(filename))
+        
+        f.write('.inputs')
+        for i in range(input_shape):
+            f.write(' i{}'.format(i))
+        f.write('\n')
+        
+        f.write('.outputs')
+        for i in range(output_shape):
+            f.write(' o{}'.format(i))
+        f.write('\n\n')
+
+        for i in range(len(threslogics)):
+            for gate in threslogics[i]:
+
+                f.write('.thres')
+                #f.write('-in')
+                for fanin in gate.fanins:
+                    f.write(' {}'.format(fanin))
+                f.write(' t{}\n'.format(gate.Id))
+                
+                #f.write('-out')
+                #for fanout in gate.fanouts:
+                #    f.write(' {}'.format(fanout))
+                #f.write('\n')
+
+                #f.write('-weight')
+                for weight in gate.weights:
+                    f.write(' {}'.format(weight))
+                f.write('{}\n\n'.format(gate.thres_val))
+
+                #f.write('-thres_val {}\n\n'.format(gate.thres_val))
+
+
+def main():
+    bnn_params = np.load('binarilized_mnist.npz')
+    input_shape  = 28 * 28 #len(bnn_params['arr_0'])
+    output_shape = 10 * 1  #len(bnn_params['arr_{}'].format(len(bnn_params) - 1))
+    n_hiddens    = 3       #len(bnn_params) / 6 - 1
+    n_units      = 4096    #len(bnn_params['arr_0'][0])
+    
+    threslogics = []
+    thresId = 0
+    for l in range(n_hiddens + 1):
+        # [W, bias, beta, gamma, mean, inv_std]
+        W       = np.transpose(bnn_params['arr_{}'.format(6 * l)])
+        bias    = np.transpose(bnn_params['arr_{}'.format(6 * l + 1)])
+        beta    = np.transpose(bnn_params['arr_{}'.format(6 * l + 2)])
+        gamma   = np.transpose(bnn_params['arr_{}'.format(6 * l + 3)])
+        mean    = np.transpose(bnn_params['arr_{}'.format(6 * l + 4)])
+        inv_std = np.transpose(bnn_params['arr_{}'.format(6 * l + 5)])
+        
+        fanins = []
+        fanouts = []
+        if l == 0:
+            assert len(W) == n_units and len(W[0]) == input_shape
+            fanins  = ['i{}'.format(i) for i in range(input_shape)]
+            fanouts = ['t{}'.format(i) for i in range(n_units)]
+        elif 0 < l < n_hiddens:
+            assert len(W) == n_units and len(W[0]) == n_units
+            fanins  = ['t{}'.format(i) for i in range((l - 1) * n_units, l * n_units)]
+            fanouts = ['t{}'.format(i) for i in range(l * n_units - 1, (l + 1) * n_units)]
+        else:
+            assert len(W) == output_shape and len(W[0]) == n_units
+            fanins  = ['t{}'.format(i) for i in range(l * n_units - 1, (l + 1) * n_units)]
+            fanouts = ['o{}'.format(i) for i in range(output_shape)]
+
+        thres = []
+
+        for i in range(len(W)):
+            a = gamma[i] * inv_std[i]
+            thres_val = -(bias[i] - 0.5) * sign(a)
+            thres.append( ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts) )
+            thresId += 1
+        threslogics.append(thres)
+    
+    print("n_hiddens: {}".format(len(threslogics)))
+    print("n_thres: ", end = '')
+    for l in range(len(threslogics)):
+        if l < len(threslogics) - 1:
+            print(len(threslogics[l]), end = ', ')
+        else:
+            print(len(threslogics[l]))
+    
+    writeNetwork('mnist_thres.tlf', threslogics, input_shape, output_shape)
+
+if __name__ == '__main__':
+    main()
