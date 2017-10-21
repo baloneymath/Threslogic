@@ -57,7 +57,7 @@ def testNetwork(threslogics, all_thresgate):
                 outs.append(gate.out)
         
         idx = None
-        if outs.count(1) > 0:
+        if outs.count(1) == 0:
             idx = outs.index(1)
         else:
             idx = -1
