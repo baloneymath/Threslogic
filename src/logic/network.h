@@ -10,7 +10,9 @@
 
 class Network {
   public:
-    Network() {}
+    Network(const string& filename = "") {
+      if (filename != "") parse(filename);
+    }
     ~Network() {}
 
     // get

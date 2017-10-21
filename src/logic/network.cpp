@@ -11,6 +11,6 @@ inline void split(const char* str, const char c, vector<string>& tokens) {
 }
 
 void Network::parse(const string& filename) {
-	_name = filename;
-	
+  _name = filename;
+  
 }

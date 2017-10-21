@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
   util::TimeUsage timer;
   srand(time(NULL));
 
+  Network ntk(gParam.inputFileName);
   util::showMemoryUsage();
   return 0;
 }
