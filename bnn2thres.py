@@ -4,6 +4,9 @@ import sys
 import time
 import numpy as np
 
+from pylearn2.datasets.mnist import MNIST
+from pylearn2.utils import serial
+
 class ThresGate():
     def __init__(self, Id, weights, thres_val, fanins, fanouts):
         self.Id = Id
@@ -11,12 +14,13 @@ class ThresGate():
         self.thres_val = thres_val
         self.fanins = fanins
         self.fanouts = fanouts
+        self.out = None
 
     def getOutput(self, inputs):
-        assert len(inputs) == len(weights)
+        assert len(inputs) == len(self.weights)
         val = 0
         for i in range(len(inputs)):
-            val += inputs[i] * weights[i]
+            val += inputs[i] * self.weights[i]
         if val >= self.thres_val:
             return 1
         return -1
@@ -25,6 +29,39 @@ def sign(x):
     if x >= 0:
         return 1
     return -1
+
+def testNetwork(threslogics, all_thresgate):
+    #train = MNIST(which_set = 'train', center = False)
+    test  = MNIST(which_set = 'test', center = False)
+    
+    result = []
+    cnt = 1
+    for i in range(len(test.X)):
+        print 'Input number {}'.format(cnt)
+        cnt += 1
+        # First layer
+        outs = []
+        print '    Testing Layer 0'
+        for gate in threslogics[0]:
+            #print len(Xdata), len(gate.weights)
+            gate.out = gate.getOutput(test.X[i])
+            outs.append(gate.out)
+        
+        for l in range(1, len(threslogics)):
+            print '    Testing Layer {}'.format(l)
+            inputs = outs[:]
+            outs[:] = []
+            for gate in threslogics[l]:
+                #print len(inputs), len(gate.weights)
+                gate.out = gate.getOutput(inputs)
+                outs.append(gate.out)
+        
+        idx = None
+        if outs.count(1) > 0:
+            idx = outs.index(1)
+        else:
+            idx = -1
+        print 'Result: {}, Ans: {}'.format(idx, test.y[i][0])
 
 def writeNetwork(filename, threslogics, input_shape, output_shape):
     with open(filename, 'w') as f:
@@ -68,14 +105,18 @@ def writeNetwork(filename, threslogics, input_shape, output_shape):
 
 
 def main():
+    print 'Loading BNN parameters.....'
     bnn_params = np.load('binarized_mnist.npz')
     input_shape  = 28 * 28 #len(bnn_params['arr_0'])
     output_shape = 10 * 1  #len(bnn_params['arr_{}'].format(len(bnn_params) - 1))
     n_hiddens    = 3       #len(bnn_params) / 6 - 1
     n_units      = 4096    #len(bnn_params['arr_0'][0])
     
+    
+    all_thresgate = []
     threslogics = []
     thresId = 0
+    print 'Parsing BNN to Threslogic Network.....'
     for l in range(n_hiddens + 1):
         # [W, bias, beta, gamma, mean, inv_std]
         W       = np.transpose(bnn_params['arr_{}'.format(6 * l)])
@@ -101,23 +142,31 @@ def main():
             fanouts = ['o{}'.format(i) for i in range(output_shape)]
 
         thres = []
-
         for i in range(len(W)):
-            a = gamma[i] * inv_std[i]
-            thres_val = -(bias[i] - 0.5) * sign(a)
-            thres.append( ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts) )
+            #a = gamma[i] * inv_std[i]
+            #thres_val = -(bias[i] - 0.5) * sign(a)
+            thres_val = mean[i] - (beta[i] / (gamma[i] * inv_std[i]))
+            #thres_val = (thres_val + len(W)) / 2
+            #print thres_val
+            thres_gate = ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts)
+            thres.append(thres_gate)
+            all_thresgate.append(thres_gate)
             thresId += 1
         threslogics.append(thres)
     
-    print("n_hiddens: {}".format(len(threslogics)))
-    print("n_thres: ", end = '')
+    print 'n_thres_layer: {}'.format(len(threslogics))
+    print 'n_thres: ',
     for l in range(len(threslogics)):
         if l < len(threslogics) - 1:
-            print(len(threslogics[l]), end = ', ')
+            print '{},'.format(len(threslogics[l])),
         else:
-            print(len(threslogics[l]))
+            print len(threslogics[l])
     
-    writeNetwork('mnist_thres.tlf', threslogics, input_shape, output_shape)
+    print 'Testing network.....'
+    testNetwork(threslogics, all_thresgate)
+    
+    #print 'Writing network.....'
+    #writeNetwork('mnist_thres.tlf', threslogics, input_shape, output_shape)
 
 if __name__ == '__main__':
     main()
