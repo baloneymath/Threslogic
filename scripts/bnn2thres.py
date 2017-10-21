@@ -103,7 +103,10 @@ def writeNetwork(filename, threslogics, input_shape, output_shape):
 
 def main():
     print('Loading BNN parameters.....')
-    bnn_params = np.load('binarized_mnist.npz')
+    bnn_params_filename = sys.argv[1]
+    out_filename = sys.argv[2]
+
+    bnn_params = np.load(bnn_params_filename)
     input_shape  = 28 * 28 #len(bnn_params['arr_0'])
     output_shape = 10 * 1  #len(bnn_params['arr_{}'].format(len(bnn_params) - 1))
     n_hiddens    = 3       #len(bnn_params) / 6 - 1
@@ -158,11 +161,11 @@ def main():
         else:
             print(len(threslogics[l]))
     
-    print('Testing network.....')
-    testNetwork(threslogics, all_thresgate)
+    #print('Testing network.....')
+    #testNetwork(threslogics, all_thresgate)
     
     print('Writing network.....')
-    writeNetwork('mnist_thres.tlf', threslogics, input_shape, output_shape)
+    writeNetwork(out_filename, threslogics, input_shape, output_shape)
 
 if __name__ == '__main__':
     main()

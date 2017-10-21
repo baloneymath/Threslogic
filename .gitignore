@@ -1,3 +1,10 @@
 *.npz
 *.tlf
 *.npy
+*.cmake
+CMakeCache.txt
+Makefile
+data/
+CMakeFiles/
+thres_opt
+
