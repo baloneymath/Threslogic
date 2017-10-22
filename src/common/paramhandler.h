@@ -12,4 +12,4 @@ struct ParamHandler {
   string outputFileName;
 };
 
-#endif
+#endif // PARAMHANDLER_H

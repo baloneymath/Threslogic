@@ -13,6 +13,6 @@ include_directories(${BASEPATH} ${INCPATH})
 set(SRC
   src/main.cpp
   src/common/arghandler.cpp
-  src/logic/network.cpp
+  src/logic/cirNetwork.cpp
 )
 add_executable(thres_opt ${SRC})

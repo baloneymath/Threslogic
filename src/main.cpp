@@ -6,6 +6,7 @@ using namespace std;
 #include "src/common/util.h"
 #include "src/common/arghandler.h"
 #include "src/common/paramhandler.h"
+#include "src/logic/cirNetwork.h"
 
 ParamHandler gParam;
 int main(int argc, char** argv) {
@@ -14,7 +15,7 @@ int main(int argc, char** argv) {
   util::TimeUsage timer;
   srand(time(NULL));
 
-  Network ntk(gParam.inputFileName);
+  CirNetwork ntk(gParam.inputFileName);
   util::showMemoryUsage();
   return 0;
 }

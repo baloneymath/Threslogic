@@ -14,6 +14,7 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <vector>
 
 #define LL long long
 constexpr unsigned MAX_UNSIGNED =  numeric_limits<unsigned>::max();
@@ -144,6 +145,36 @@ inline void showMemoryUsage() {
   fprintf(stderr, "Curr Memory Usage: %f MB\n", getCurrMemoryUsage() / MEMORY_SCALE);
 }
 
+// string
+inline void splitString(const char* str, const string& delims, vector<string>& tokens) {
+  tokens.clear();
+  string s(str), token;
+  size_t cur, prev = 0;
+  cur = s.find_first_of(delims);
+  while (cur != std::string::npos) {
+    token = s.substr(prev, cur - prev);
+    if (token != "") tokens.push_back(token);
+    prev = cur + 1;
+    cur = s.find_first_of(delims, prev);
+  }
+  token = s.substr(prev, cur - prev);
+  if (token != "") tokens.push_back(token);
 }
 
-#endif
+inline void splitString(const string& s, const string& delims, vector<string>& tokens) {
+  tokens.clear();
+  string token;
+  size_t cur, prev = 0;
+  cur = s.find_first_of(delims);
+  while (cur != std::string::npos) {
+    token = s.substr(prev, cur - prev);
+    if (token != "") tokens.push_back(token);
+    prev = cur + 1;
+    cur = s.find_first_of(delims, prev);
+  }
+  token = s.substr(prev, cur - prev);
+  if (token != "") tokens.push_back(token);
+}
+}
+
+#endif // UTIL_H
