@@ -30,6 +30,14 @@ ArgHandler::ArgHandler(int argc, char **argv, ParamHandler& gParam) {
       if (++i >= argc) dumpUsage();
       gParam.outputFileName = argv[i];
     }
+    else if (strcmp(argv[i] + 1, "MNIST_train") == 0) {
+      if (++i >= argc) dumpUsage();
+      gParam.MNIST_train = argv[i];
+    }
+    else if (strcmp(argv[i] + 1, "MNIST_test") == 0) {
+      if (++i >= argc) dumpUsage();
+      gParam.MNIST_test = argv[i];
+    }
     ++i;
   }
   if (!util::existFile(gParam.inputFileName)) {

@@ -30,7 +30,7 @@ def sign(x):
 def testNetwork(threslogics, all_thresgate):
     test_X = np.load(sys.argv[3])
     test_y = np.load(sys.argv[4])
-    
+    test_X = 2 * test_X - 1;
     result = []
     cnt = 1
     for i in range(len(test_X)):
@@ -95,12 +95,12 @@ def writeNetwork(filename, threslogics, input_shape, output_shape):
 
                 #f.write('-weight')
                 for weight in gate.weights:
-                    f.write(' {}'.format(weight))
+                    f.write('{} '.format(weight))
                 f.write('{}\n\n'.format(gate.thres_val))
 
                 #f.write('-thres_val {}\n\n'.format(gate.thres_val))
         for i in range(output_shape):
-            f.write('.po t{} o{}\n'.format(threslogics[len(threslogics) - 1][i].Id), i);
+            f.write('.po t{} o{}\n'.format(threslogics[len(threslogics) - 1][i].Id, i));
 
 def main():
     print('Loading BNN parameters.....')

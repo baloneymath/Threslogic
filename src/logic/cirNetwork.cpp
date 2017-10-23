@@ -49,8 +49,8 @@ void CirNetwork::parse(const string& filename) {
   _gates.resize(gate_cnt);
   _piGates.reserve(piGate_cnt);
   _poGates.reserve(poGate_cnt);
-  _thresgates.reserve(thresGate_cnt);
-  _gates[0] = CirConst1Gate();
+  _thresGates.reserve(thresGate_cnt);
+  _gates[0] = new CirConst1Gate();
   unsigned cnt = 1;
   while (fgets(buf, sizeof(buf), fin)) {
     if (buf[0] == '#') continue;
@@ -59,47 +59,53 @@ void CirNetwork::parse(const string& filename) {
     if (tokens.size() > 0) {
       if (tokens[0] == ".inputs") {
         for (unsigned i = 1; i < tokens.size(); ++i) {
-          CirPiGate g(cnt, tokens[i]);
+          CirPiGate* g = new CirPiGate(cnt, tokens[i]);
           _gates[cnt++] = g;
           _piGates.push_back(g);
         }
       }
       else if (tokens[0] == ".outputs") {
         for (unsigned i = 1; i < tokens.size(); ++i) {
-          CirPoGate g(cnt, tokens[i]);
+          CirPoGate* g = new CirPoGate(cnt, tokens[i]);
           _gates[cnt++] = g;
           _poGates.push_back(g);
         }
       }
       else if (tokens[0] == ".thres") {
-        CirThresGate g(cnt, tokens.back());
+        CirThresGate* g = new CirThresGate(cnt, tokens.back());
         for (unsigned i = 1; i < tokens.size() - 1; ++i) {
           unsigned faninId = name2gateId[tokens[i]];
-          g.addFanin(faninId);
-          _gates[faninId].addFanout(g.Id());
+          g->addFanin(_gates[faninId]);
+          _gates[faninId]->addFanout(g);
         }
         fgets(buf, sizeof(buf), fin);
         buf[strcspn(buf, "\n\r")] = 0;
         util::splitString(buf, ' ', tokens);
         for (unsigned i = 0; i < tokens.size() - 1; ++i)
-          g.addWeight(stoi(tokens[i]));
-        g.setThreshold(stof(tokens.back()));
+          g->addWeight(stoi(tokens[i]));
+        g->setThreshold(ceil(stof(tokens.back())));
         _gates[cnt++] = g;
-        _thresgates.push_back(g);
+        _thresGates.push_back(g);
       }
       else if (tokens[0] == ".po") {
-        CirGate& g = _gates[name2gateId[tokens.back()]];
+        CirGate* g = _gates[name2gateId[tokens.back()]];
         unsigned faninId = name2gateId[tokens[1]];
-        g.addFanin(faninId);
-        _gates[faninId].addFanout(g.Id());
+        g->addFanin(_gates[faninId]);
+        _gates[faninId]->addFanout(g);
       }
     }
   }
-  CirGate& g = _gates[4500];
-  vector<float> v(784, 1);
-  cerr << g.computeOutput(v) << endl;
-  //for (unsigned i = 0; i < g.numFanins(); ++i) {
-  //  cerr << _gates[g.faninId(i)].name() << ' ';
+  //CirGate* g = _gates[4500];
+  //cerr << g->isThres() << endl;
+  //cerr << g->numFanins() << endl;
+  //cerr << g->numFanouts() << endl;
+  //cerr << g->getTypeStr() << endl;
+  //cerr << g->threshold() << endl;
+  //for (unsigned i = 0; i < g->numFanins(); ++i) {
+  //  cerr << g->fanin(i)->name() << ' ';
+  //}
+  //for (unsigned i = 0; i < g->numFanouts(); ++i) {
+  //  cerr << g->fanout(i)->name() << ' ';
   //}
   //cerr << endl;
   fclose(fin);
