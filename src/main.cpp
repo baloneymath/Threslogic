@@ -16,6 +16,6 @@ int main(int argc, char** argv) {
   srand(time(NULL));
 
   CirNetwork ntk(gParam.inputFileName);
-  util::showMemoryUsage();
+  util::showMemoryUsage(1);
   return 0;
 }

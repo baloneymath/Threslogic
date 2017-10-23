@@ -140,9 +140,9 @@ inline double getCurrMemoryUsage() {
   return -1;
 #endif
 }
-inline void showMemoryUsage() {
-  fprintf(stderr, "Peak Memory Usage: %f MB\n", getPeakMemoryUsage() / MEMORY_SCALE);
-  fprintf(stderr, "Curr Memory Usage: %f MB\n", getCurrMemoryUsage() / MEMORY_SCALE);
+inline void showMemoryUsage(bool flag) {
+  if (flag) fprintf(stderr, "Peak Memory Usage: %f MB\n", getPeakMemoryUsage() / MEMORY_SCALE);
+  else      fprintf(stderr, "Curr Memory Usage: %f MB\n", getCurrMemoryUsage() / MEMORY_SCALE);
 }
 
 // string

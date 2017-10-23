@@ -11,11 +11,11 @@ void CirNetwork::parse(const string& filename) {
   unsigned poGate_cnt = 0;
   unsigned thresGate_cnt = 0;
   while (fgets(buf, sizeof(buf), fin)) {
+    if (buf[0] == '#') continue;
     buf[strcspn(buf, "\n\r")] = 0;
     util::splitString(buf, " ", tokens);
     if (tokens.size() > 0) {
-      if (tokens[0][0] == '#') continue;
-      else if (tokens[0] == ".model") _name = tokens[1];
+      if (tokens[0] == ".model") _name = tokens[1];
       else if (tokens[0] == ".inputs") piGate_cnt = tokens.size() - 1;
       else if (tokens[0] == ".outputs") poGate_cnt = tokens.size() - 1;
       else if (tokens[0] == ".thres") {
@@ -40,6 +40,7 @@ void CirNetwork::parse(const string& filename) {
   _thresgates.reserve(thresGate_cnt);
   unsigned cnt = 1;
   while (fgets(buf, sizeof(buf), fin)) {
+    if (buf[0] == '#') continue;
     buf[strcspn(buf, "\n\r")] = 0;
     util::splitString(buf, " ", tokens);
     if (tokens.size() > 0) {
