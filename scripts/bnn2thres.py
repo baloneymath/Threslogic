@@ -30,7 +30,7 @@ def sign(x):
 def testNetwork(threslogics, all_thresgate):
     test_X = np.load(sys.argv[3])
     test_y = np.load(sys.argv[4])
-    test_X = 2 * test_X - 1;
+    test_X = 2 * test_X - 1; # normalize to [-1, 1]
     result = []
     cnt = 1
     for i in range(len(test_X)):
@@ -162,8 +162,8 @@ def main():
         else:
             print(len(threslogics[l]))
     
-    print('Testing network.....')
-    testNetwork(threslogics, all_thresgate)
+    #print('Testing network.....')
+    #testNetwork(threslogics, all_thresgate)
     
     print('Writing network.....')
     writeNetwork(out_filename, threslogics, input_shape, output_shape)
