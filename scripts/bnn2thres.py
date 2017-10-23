@@ -28,8 +28,8 @@ def sign(x):
     return -1
 
 def testNetwork(threslogics, all_thresgate):
-    test_X = np.load('mnist_test_X.npy')
-    test_y = np.load('mnist_test_y.npy')
+    test_X = np.load(sys.argv[3])
+    test_y = np.load(sys.argv[4])
     
     result = []
     cnt = 1
@@ -99,7 +99,8 @@ def writeNetwork(filename, threslogics, input_shape, output_shape):
                 f.write('{}\n\n'.format(gate.thres_val))
 
                 #f.write('-thres_val {}\n\n'.format(gate.thres_val))
-
+        for i in range(output_shape):
+            f.write('.po t{} o{}\n'.format(threslogics[len(threslogics) - 1][i].Id), i);
 
 def main():
     print('Loading BNN parameters.....')
@@ -138,7 +139,7 @@ def main():
             fanouts = ['t{}'.format(i) for i in range(l * n_units - 1, (l + 1) * n_units)]
         else:
             assert len(W) == output_shape and len(W[0]) == n_units
-            fanins  = ['t{}'.format(i) for i in range(l * n_units - 1, (l + 1) * n_units)]
+            fanins  = ['t{}'.format(i) for i in range((l - 1) * n_units - 1, l * n_units)]
             fanouts = ['o{}'.format(i) for i in range(output_shape)]
 
         thres = []
@@ -161,8 +162,8 @@ def main():
         else:
             print(len(threslogics[l]))
     
-    #print('Testing network.....')
-    #testNetwork(threslogics, all_thresgate)
+    print('Testing network.....')
+    testNetwork(threslogics, all_thresgate)
     
     print('Writing network.....')
     writeNetwork(out_filename, threslogics, input_shape, output_shape)

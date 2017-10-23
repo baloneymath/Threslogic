@@ -175,6 +175,17 @@ inline void splitString(const string& s, const string& delims, vector<string>& t
   token = s.substr(prev, cur - prev);
   if (token != "") tokens.push_back(token);
 }
+
+inline void splitString(const char* str, const char c, vector<string>& tokens) {
+  tokens.clear();
+  do {
+    const char* begin = str;
+    while (*str != c && *str) ++str;
+    string s = string(begin, str);
+    if (s != "") tokens.push_back(s);
+  } while (*str++);
+}
+
 }
 
 #endif // UTIL_H

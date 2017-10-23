@@ -2,7 +2,6 @@
 #define CIR_NETWORK_H
 
 #include <vector>
-//#include <map>
 #include "src/common/util.h"
 #include "cirGate.h"
 #include "cirThresGate.h"
@@ -21,7 +20,6 @@ class CirNetwork {
     unsigned numPiGates() const {return _piGates.size(); }
     unsigned numPoGates() const {return _poGates.size(); }
     unsigned numThresgates() const { return _thresgates.size(); }
-    CirThresGate& thresgate(unsigned i) { return _thresgates[i]; }
   
     void parse(const string& filename);
     
@@ -31,7 +29,6 @@ class CirNetwork {
     vector<CirPiGate>     _piGates;
     vector<CirPoGate>     _poGates;
     vector<CirThresGate>  _thresgates;
-    //map<string, CirGate>  _gatesMap;
 };
 
 

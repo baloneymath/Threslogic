@@ -6,9 +6,10 @@
 #include "src/common/util.h"
 
 class CirThresGate : public CirGate {
+  friend class CirNetwork;
   public:
-    CirThresGate(unsigned Id = 0, float val = 0)
-      : CirGate(Id), _threshold(val) {}
+    CirThresGate(unsigned Id = 0, const string& n = "", float val = 0)
+      : CirGate(Id, n), _threshold(val) { setType(THRESHOLD_GATE); }
 
     // get
     float threshold() const { return _threshold; }
@@ -24,10 +25,10 @@ class CirThresGate : public CirGate {
       setSimVal(val);
       return val;
     }
-
+  protected:
     // set
     void addWeight(int i) { _weights.push_back(i); }
-
+    void setThreshold(float val) { _threshold = val; }
   private:
     float _threshold;
     vector<int> _weights;
