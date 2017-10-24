@@ -83,7 +83,7 @@ void CirNetwork::parse(const string& filename) {
         util::splitString(buf, ' ', tokens);
         for (unsigned i = 0; i < tokens.size() - 1; ++i)
           g->addWeight(stoi(tokens[i]));
-        g->setThreshold(ceil(stof(tokens.back())));
+        g->setThreshold(stof(tokens.back()));
         _gates[cnt++] = g;
         _thresGates.push_back(g);
       }

@@ -2,6 +2,7 @@
 
 import sys
 import time
+import math
 import numpy as np
 
 class ThresGate():
@@ -102,7 +103,7 @@ def writeNetwork(filename, threslogics, input_shape, output_shape):
         for i in range(output_shape):
             f.write('.po t{} o{}\n'.format(threslogics[len(threslogics) - 1][i].Id, i));
 
-def main():
+def transform_MNIST_dense():
     print('Loading BNN parameters.....')
     bnn_params_filename = sys.argv[1]
     out_filename = sys.argv[2]
@@ -144,11 +145,15 @@ def main():
 
         thres = []
         for i in range(len(W)):
-            #a = gamma[i] * inv_std[i]
-            #thres_val = -(bias[i] - 0.5) * sign(a)
             thres_val = mean[i] - (beta[i] / (gamma[i] * inv_std[i]))
-            #thres_val = (thres_val + len(W)) / 2
-            thres_gate = ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts)
+            if l > 0:
+                thres_val = math.ceil(thres_val)
+            thres_gate = None
+            if gamma[i] * inv_std[i] < 0:
+                thres_gate = ThresGate(thresId, [-int(w) for w in W[i]], thres_val, fanins, fanouts)
+            else:
+                thres_gate = ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts)
+            #thres_gate = ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts)
             thres.append(thres_gate)
             all_thresgate.append(thres_gate)
             thresId += 1
@@ -169,4 +174,4 @@ def main():
     writeNetwork(out_filename, threslogics, input_shape, output_shape)
 
 if __name__ == '__main__':
-    main()
+    transform_MNIST_dense()
