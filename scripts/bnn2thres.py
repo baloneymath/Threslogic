@@ -150,7 +150,7 @@ def transform_MNIST_dense():
                 thres_val = math.ceil(thres_val)
             thres_gate = None
             if gamma[i] * inv_std[i] < 0:
-                thres_gate = ThresGate(thresId, [-int(w) for w in W[i]], thres_val, fanins, fanouts)
+                thres_gate = ThresGate(thresId, [-int(w) for w in W[i]], -thres_val, fanins, fanouts)
             else:
                 thres_gate = ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts)
             #thres_gate = ThresGate(thresId, [int(w) for w in W[i]], thres_val, fanins, fanouts)
